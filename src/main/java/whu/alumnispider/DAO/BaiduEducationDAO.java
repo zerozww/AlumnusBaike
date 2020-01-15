@@ -10,7 +10,7 @@ import java.util.List;
 public class BaiduEducationDAO {
     private Connection conn = null;
     private Statement stmt = null;
-    private static String alumniTable = "`alumnis_v2`";
+    private static String alumniTable = "`alumnus_v3`";
 
     public BaiduEducationDAO() {
         try {

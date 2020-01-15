@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class BaiduBirthday {
     private static AlumniDAO alumniDAO = new AlumniDAO();
-    private static String alumniTable = "alumnus_v2";
+    private static String alumniTable = "alumnus_v3";
     private static Pattern birthYearPattern = Pattern.compile(ReExpUtility.reYear);
 
     // add "date_birth" property in database.

@@ -1,8 +1,6 @@
 package whu.alumnispider.utilities;
 
 import java.sql.Timestamp;
-import java.time.Year;
-
 
 public class Alumni {
     private String name;

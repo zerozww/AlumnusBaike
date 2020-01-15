@@ -11,7 +11,7 @@ public class BaiduPictureDAO {
     private Connection conn = null;
     private Statement stmt = null;
     private static String pictureTable = "`picture`";
-    private static String alumniTable = "`alumnis_v2`";
+    private static String alumniTable = "`alumnus_v3`";
 
     public BaiduPictureDAO() {
         try {
