@@ -93,6 +93,7 @@ public class BaiduEducation {
     }
 
     private static String[] getSplitContent(String word) {
+        // 将（其间： ）格式去除
         String bracketRgex = "(.*?)（(?:[其期]间[，：]?)?((?:\\d{2}[年.]\\d{1,2}|\\d{4}[年.至—~]).*)）(.*)";
         List<String> contentSplitList = new ArrayList<>();
         Pattern pattern = Pattern.compile(bracketRgex);

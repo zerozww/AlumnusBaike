@@ -15,7 +15,7 @@ public class BaiduEducationDAO {
     public BaiduEducationDAO() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/test?serverTimezone=UTC", "root", "123456");
+            conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/test?serverTimezone=UTC", "root", "zww123456");
             stmt = conn.createStatement();
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();

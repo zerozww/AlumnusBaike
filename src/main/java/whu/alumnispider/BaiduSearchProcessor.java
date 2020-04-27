@@ -380,7 +380,7 @@ public class BaiduSearchProcessor implements PageProcessor {
     }
 
     private static void searchAlumniForTest() {
-        searchNameList = Arrays.asList("何军", "隋忠诚");
+        searchNameList = Arrays.asList("侯伟");
         List<String> urls = new ArrayList<>();
         for (String name : searchNameList) {
             urls.add("https://baike.baidu.com/item/" + name);
