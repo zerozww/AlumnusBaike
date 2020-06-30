@@ -7,5 +7,11 @@
       <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:mysql://localhost:3306/test</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="alumnus" uuid="40a79a57-4fe4-45b3-94fc-db3adb0c927a">
+      <driver-ref>sqlserver.ms</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
+      <jdbc-url>jdbc:sqlserver://localhost:1433;database=alumnus</jdbc-url>
+    </data-source>
   </component>
 </project>

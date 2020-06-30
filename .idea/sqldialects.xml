@@ -11,5 +11,9 @@
     <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduPictureDAO.java" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduRetiredDAO.java" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduTableDAO.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/PersonGraduateInfoDAO.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/PersonInfoDAO.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/PersonNameDAO.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/SchoolDAO.java" dialect="GenericSQL" />
   </component>
 </project>

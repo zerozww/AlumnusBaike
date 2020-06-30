@@ -5,14 +5,45 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import us.codecraft.webmagic.selector.Html;
+import us.codecraft.webmagic.selector.Selectable;
 import whu.alumnispider.utils.Utility;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BaiduMainContent {
+public class BaiduContent {
+    private static final String[] SCHOOLNAME = {"武汉大学", "武汉水利电力大学", "武汉测绘科技大学", "湖北医科大学",
+            "武汉水利水电学院", "葛洲坝水电工程学院", "武汉测绘学院", "武汉测量制图学院", "湖北医学院", "湖北省医学院",
+            "湖北省立医学院", "武汉水利电力学院"};
 
     private static Utility util = new Utility();
+
+    public static String getBriefIntro(Html html) {
+        Selectable briefIntroPage;
+        String briefIntro = "";
+        List<String> briefIntroList;
+        String briefIntroXpath = "//div[@class='lemma-summary']/div[@class='para']/allText()";
+
+        briefIntroPage = html.xpath(briefIntroXpath);
+        briefIntroList = briefIntroPage.all();
+        for (String str : briefIntroList) {
+            briefIntro = briefIntro + str;
+        }
+        briefIntro = util.getPureStringFromText(briefIntro);
+        return briefIntro;
+    }
+
+    public static String getLabel(Html html) {
+        Selectable labelPage;
+        String label;
+        String labelXpath = "//div[@id='open-tag']/dd[@id='open-tag-item']/allText()";
+
+        labelPage = html.xpath(labelXpath);
+        label = labelPage.toString();
+        return label;
+    }
 
     /**
      * @param html html
@@ -20,6 +51,7 @@ public class BaiduMainContent {
      * @description 获取人物正文的html
      */
     public static String getMainContent(Html html) {
+        String editRgex = "<a class=\"edit-icon j-edit-link\"[\\s\\S].*?</a>";
         Document doc = Jsoup.parse(html.toString());
         Elements nodes = doc.getElementsByClass("main-content");
         Element node = nodes.get(0);
@@ -37,7 +69,10 @@ public class BaiduMainContent {
         if (m.find()) {
             mainContent = m.group(1);
         }
-        mainContent = util.getPureStringFromHtml(mainContent);
+        if (mainContent!=null){
+            mainContent = util.getPureStringFromHtml(mainContent);
+            mainContent = mainContent.replaceAll(editRgex,"");
+        }
         return mainContent;
     }
 
@@ -104,5 +139,36 @@ public class BaiduMainContent {
         rgex = rgex.replaceAll("\\[", "\\\\[");
         rgex = rgex.replaceAll("\\.", "\\\\.");
         return rgex;
+    }
+
+    /**
+     * @param html 人物词条html
+     * @return 所有包含武大同义词的段落
+     * @description
+     */
+    public static String getRelatedContent(Html html) {
+        String content = "";
+        String contentXpath1 = "//div[@class='para']/allText()";
+        String contentXpath2 = "//dd[@class='lemmaWgt-lemmaTitle-title']/allText()";
+        String contentXpath3 = "//div[@class='basic-info cmn-clearfix']//dd/allText()";
+        String contentXpath4 = "//dl[@class='lemma-reference collapse nslog-area log-set-param']//li/allText()";
+        List<String> contents = new ArrayList<>();
+        Selectable contentPage;
+        contentPage = html.xpath(contentXpath1);
+        contents = contentPage.all();
+        contentPage = html.xpath(contentXpath2);
+        contents.add(contentPage.toString());
+        contentPage = html.xpath(contentXpath3);
+        contents.addAll(contentPage.all());
+        contentPage = html.xpath(contentXpath4);
+        contents.addAll(contentPage.all());
+        for (String tempContent : contents) {
+            for (String schoolName : SCHOOLNAME) {
+                if (tempContent.contains(schoolName)) {
+                    content = content + tempContent;
+                }
+            }
+        }
+        return content;
     }
 }

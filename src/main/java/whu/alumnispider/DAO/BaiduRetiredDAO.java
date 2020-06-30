@@ -5,7 +5,7 @@ import whu.alumnispider.utilities.Alumni;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
+//只在更新数据时使用，在正常运行程序时不会使用该类
 public class BaiduRetiredDAO {
     private Connection conn = null;
     private Statement stmt = null;

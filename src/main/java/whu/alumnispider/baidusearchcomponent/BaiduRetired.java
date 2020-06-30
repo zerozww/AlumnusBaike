@@ -4,7 +4,7 @@ import whu.alumnispider.DAO.BaiduRetiredDAO;
 import whu.alumnispider.utilities.Alumni;
 
 import java.util.List;
-
+//只在更新数据时使用，在正常运行程序时不会使用该类
 public class BaiduRetired {
 
     private static BaiduRetiredDAO baiduRetiredDAO = new BaiduRetiredDAO();

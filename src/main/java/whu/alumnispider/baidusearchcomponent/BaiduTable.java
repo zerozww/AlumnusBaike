@@ -20,10 +20,16 @@ public class BaiduTable {
      */
     public static String getAllContentFromTable(Html html) {
         String content;
+        String blank160Rgex = "\\u00A0*";
+        String indexPath = "\\[\\d*?-?\\d*?]";
         Selectable contentInfoPage;
         String tableXpath = "//div[@class='basic-info cmn-clearfix']/allText()";
         contentInfoPage = html.xpath(tableXpath);
         content = contentInfoPage.toString();
+        if (content!=null){
+            content = content.replaceAll(blank160Rgex, "");
+            content = content.replaceAll(indexPath, "");
+        }
         return content;
     }
 
@@ -36,8 +42,10 @@ public class BaiduTable {
     public static String getTableContentFromDatabase(String website, String[] attrNames) {
         String content;
         String[] rgexArray;
+        /** 采集数据时已经对数据进行处理
         String blank160Rgex = "\\u00A0*";
         String indexPath = "\\[\\d*?-?\\d*?]";
+         */
         // 将传入的属性名转化为正则表达式
         List<String> rgexList = new ArrayList<>();
         for (String attrName : attrNames) {
@@ -48,8 +56,10 @@ public class BaiduTable {
         content = baiduTableDAO.getTableContent(website);
         //结尾加空格，使得dd的内容始终被空格包裹
         content = content + " ";
+        /** 采集数据时已经对数据进行处理
         content = content.replaceAll(blank160Rgex, "");
         content = content.replaceAll(indexPath, "");
+         */
         content = util.getMatching(content, rgexArray);
         return content;
     }
@@ -111,9 +121,10 @@ public class BaiduTable {
     public static String getContentFromTableStr(String tableStr, String[] attrNames) {
         String content;
         String[] rgexArray;
+        /** 采集数据时已经对数据进行处理
         String blank160Rgex = "\\u00A0*";
         String indexPath = "\\[\\d*?-?\\d*?]";
-
+         */
         // 将传入的属性名转化为正则表达式
         List<String> rgexList = new ArrayList<>();
         for (String attrName : attrNames) {
@@ -125,8 +136,10 @@ public class BaiduTable {
         content = tableStr;
         //结尾加空格，使得dd的内容始终被空格包裹
         content = content + " ";
+        /** 采集数据时已经对数据进行处理
         content = content.replaceAll(blank160Rgex, "");
         content = content.replaceAll(indexPath, "");
+         */
         content = util.getMatching(content, rgexArray);
         return content;
     }

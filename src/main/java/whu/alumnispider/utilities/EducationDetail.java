@@ -1,15 +1,35 @@
 package whu.alumnispider.utilities;
 
 public class EducationDetail {
+    private String matchName;
+    private String education;
     private String degree;
     private String field;
     private String time;
     private int level;
 
-    public EducationDetail(String degree, String field, String time) {
+    public EducationDetail(String matchName,String education,String degree, String field, String time) {
+        this.matchName = matchName;
+        this.education = education;
         this.degree = degree;
         this.field = field;
         this.time = time;
+    }
+
+    public String getMatchName() {
+        return matchName;
+    }
+
+    public void setMatchName(String matchName) {
+        this.matchName = matchName;
+    }
+
+    public String getEducation() {
+        return education;
+    }
+
+    public void setEducation(String education) {
+        this.education = education;
     }
 
     public String getDegree() {

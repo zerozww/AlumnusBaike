@@ -11,37 +11,48 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BaiduEducationDetial {
+    /*
     private static final String[] SCHOOLNAME = {"武汉大学", "武汉水利电力大学", "武汉测绘科技大学", "湖北医科大学",
             "武汉水利水电学院", "葛洲坝水电工程学院", "武汉测绘学院", "武汉测量制图学院", "湖北医学院", "湖北省医学院",
             "湖北省立医学院", "武汉水利电力学院"};
-    private static BaiduEducationDAO alumniDAO = new BaiduEducationDAO();
-    private static Utility util = new Utility();
+     */
+    private BaiduEducationDAO alumniDAO = new BaiduEducationDAO();
+    private Utility util = new Utility();
+    private String[] schoolName;
+
+
+
+    public BaiduEducationDetial(){}
 
     /**
      * @return void
      * @description 获取并更新数据库中所有人物学历信息的时间、院系、学位
      */
-    public static void updateAllEducationDetail() {
+    /*
+    public void updateAllEducationDetail() {
         List<Alumni> alumniList = alumniDAO.getEducationList();
         for (Alumni alumni : alumniList) {
             updateEducationDetailFromAlumni(alumni);
         }
     }
 
-    private static void updateEducationDetailFromAlumni(Alumni alumni) {
+    private void updateEducationDetailFromAlumni(Alumni alumni) {
         String website = alumni.getWebsite();
         String education = alumni.getEducation();
         EducationDetail educationDetail = getEduDetailFromEducation(education);
         if (educationDetail != null)
             alumniDAO.updateEducationDetail(educationDetail, website);
     }
+     */
+
+
 
     /**
      * @param education 人物学历信息
-     * @return whu.alumnispider.utilities.Education
+     * @return 人物的匹配当前学校的最高学位学习经历
      * @description 获取人物的学历信息中的时间、院系、学位
      */
-    public static EducationDetail getEduDetailFromEducation(String education) {
+    public EducationDetail getEduDetailFromEducation(String education) {
         EducationDetail resultEducationDetail = null;
         if (education == null || education.isEmpty())
             return null;
@@ -63,7 +74,7 @@ public class BaiduEducationDetial {
                 educationRgexList.toArray(educationRgexArray);
                 field = util.getMatching(educationSplit, educationRgexArray);
                 time = getEducationTime(educationSplit);
-                educationDetailList.add(new EducationDetail(null, field, time));
+                educationDetailList.add(new EducationDetail(schoolName,educationSplit,null, field, time));
             } else {
                 String[] wordArray = educationSplit.split("，");
                 String educationForAnalyze;
@@ -96,9 +107,10 @@ public class BaiduEducationDetial {
                 educationRgexList.toArray(educationRgexArray);
                 field = util.getMatching(educationForAnalyze, educationRgexArray);
                 time = getEducationTime(educationForAnalyze);
-                educationDetailList.add(new EducationDetail(degree, field, time));
+                educationDetailList.add(new EducationDetail(schoolName,educationSplit,degree, field, time));
             }//end of else
         }//end of for
+
         if (!educationDetailList.isEmpty()) {
             resultEducationDetail = getHigherEducation(educationDetailList);
             return resultEducationDetail;
@@ -106,7 +118,7 @@ public class BaiduEducationDetial {
             return null;
     }
 
-    private static EducationDetail getHigherEducation(List<EducationDetail> educationDetailList) {
+    private EducationDetail getHigherEducation(List<EducationDetail> educationDetailList) {
         EducationDetail resultEducationDetail = educationDetailList.get(educationDetailList.size() - 1);
         if (educationDetailList.size() == 1) {
             return resultEducationDetail;
@@ -123,7 +135,8 @@ public class BaiduEducationDetial {
         }
     }
 
-    private static String getEducationTime(String word) {
+
+    private String getEducationTime(String word) {
         String rgex1 = "\\d{2,4}[年.]\\d{1,2}[月]?([~～\\-]|(—{1,2})?)\\d{2,4}[年.]\\d{1,2}[月]?";
         String rgex2 = "\\d{2,4}[年.]\\d{1,2}[月]?";
         String rgex3 = "\\d{2,4}年";
@@ -145,7 +158,7 @@ public class BaiduEducationDetial {
         return null;
     }
 
-    private static List<String> getEducationRgexList(String schoolName) {
+    private List<String> getEducationRgexList(String schoolName) {
         List<String> educationRgexList = new ArrayList<>();
         String[] fieldArray = {"专业", "系", "学院", "社会学", "心理学", "法学", "经济学"};
         for (String field : fieldArray) {
@@ -155,7 +168,7 @@ public class BaiduEducationDetial {
         return educationRgexList;
     }
 
-    private static String getEducationDegree(String word) {
+    private String getEducationDegree(String word) {
         String[] degreeArray = {"学士", "本科", "大专", "讲师", "教师"};
         if (word.contains("教授")) {
             if (word.contains("副教授"))
@@ -188,8 +201,8 @@ public class BaiduEducationDetial {
         return null;
     }
 
-    private static String getSchoolNameFromWord(String word) {
-        for (String schoolName : SCHOOLNAME) {
+    private String getSchoolNameFromWord(String word) {
+        for (String schoolName : schoolName) {
             if (word.contains(schoolName)) {
                 return schoolName;
             }
@@ -197,4 +210,11 @@ public class BaiduEducationDetial {
         return null;
     }
 
+    public String[] getSchoolName() {
+        return schoolName;
+    }
+
+    public void setSchoolName(String[] schoolName) {
+        this.schoolName = schoolName;
+    }
 }

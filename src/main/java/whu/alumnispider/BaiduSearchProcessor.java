@@ -18,6 +18,9 @@ import java.util.*;
 
 public class BaiduSearchProcessor implements PageProcessor {
     private static BaiduAlumniDAO baiduAlumniDAO = new BaiduAlumniDAO();
+    private static PersonInfoDAO personInfoDAO = new PersonInfoDAO();
+    private static PersonNameDAO personNameDAO = new PersonNameDAO();
+    private static SchoolDAO schoolDAO = new SchoolDAO();
     private Utility util = new Utility();
     private Site site = Site.me().setSleepTime(150).setRetryTimes(2)
             .addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
@@ -32,8 +35,7 @@ public class BaiduSearchProcessor implements PageProcessor {
     private static final String[] SCHOOLNAME = {"武汉大学", "武汉水利电力大学", "武汉测绘科技大学", "湖北医科大学",
             "武汉水利水电学院", "葛洲坝水电工程学院", "武汉测绘学院", "武汉测量制图学院", "湖北医学院", "湖北省医学院",
             "湖北省立医学院", "武汉水利电力学院"};
-    private static final String[] ILLEGALWORDS = {"违纪", "违法"};
-    private static final String[] PERSONILLEGALWORDS = {"涉嫌", "因"};
+
 
     @Override
     public Site getSite() {
@@ -52,7 +54,12 @@ public class BaiduSearchProcessor implements PageProcessor {
         String personLinkXpath = "//ul[@class='polysemantList-wrapper cmn-clearfix']/li/a/@href";
         String personLinkXpath2 = "//ul[@class='custom_dot  para-list list-paddingleft-1']/li/div/a/@href";
         String personNamePath = "https://baike\\.baidu\\.com/item/(.*)";
+        String errorPath = "<h1 class=\"baikeLogo\"> 百度百科错误页 </h1>";
         String name = util.getMatching(page.getUrl().toString(), personNamePath);
+        if (page.getHtml().toString().contains(errorPath)) {
+            personNameDAO.updatePersonName(name);
+            return;
+        }
         // 第一次搜索，才爬取其他目录的网址
         if (searchNameList.contains(name)) {
             // 寻找其他目录
@@ -71,20 +78,27 @@ public class BaiduSearchProcessor implements PageProcessor {
             }
             // 该页面不用爬取
             if (personPages.size() > 0) {
-                //baiduAlumniDAO.updateCandidate(name);
+                personNameDAO.updatePersonName(name);
                 return;
             }
         }
+        /*
+        // 不需要判断是否与学校有关就可以提取人物信息
         if (isPersonRelated2Whu(page)) {
             getInformation(page);
         }
+         */
+        getInformation(page);
 
         //已经爬取完
         if (searchNameList.contains(name)) {
-            //baiduAlumniDAO.updateCandidate(name);
+            personNameDAO.updatePersonName(name);
         }
     }
 
+    /**
+     * 新版本在爬取人物信息时不需要判断是否与武大相关
+     */
     // 判断人物是否与武大有关，并保存网址和匹配的关键词
     private boolean isPersonRelated2Whu(Page page) {
         String entryTextXpath = "//dd/allText()";
@@ -119,16 +133,6 @@ public class BaiduSearchProcessor implements PageProcessor {
         return false;
     }
 
-
-    private boolean isPersonRelated2Illegal(Html html) {
-        String mainTextXpath = "//div[@class='para']/allText()";
-        Selectable personWord;
-        List<String> personWords;
-        personWord = html.xpath(mainTextXpath);
-        personWords = personWord.all();
-        return isWordRelated2Illegal(personWords);
-    }
-
     private String getWordRelated2Whu(String word) {
         for (String schoolName : SCHOOLNAME) {
             if (word.contains(schoolName)) {
@@ -149,224 +153,176 @@ public class BaiduSearchProcessor implements PageProcessor {
         return null;
     }
 
-    private boolean isWordRelated2Illegal(List<String> personWords) {
-        for (String illegalWord : ILLEGALWORDS) {
-            for (String word : personWords)
-                if (word.contains(illegalWord)) {
-                    for (String personIllegalWord : PERSONILLEGALWORDS) {
-                        if (word.contains(personIllegalWord))
-                            return true;
-                    }
-                }
-        }
-        return false;
-    }
 
-    // get person information
-    private void getInformation(Page page) {
+    // get person information,use method from baidusearchcomponent
+    private int getInformation(Page page) {
         Html html = page.getHtml();
-
-        String job = getJob(html);
-        String name = getName(html);
-        boolean isIllegal = isPersonRelated2Illegal(html);
         String website = page.getUrl().toString();
-        String picture = getPicture(html);
-        String content = getContent(html);
-        String label = getLabel(html);
-        String briefIntro = getBriefIntro(html);
-        Timestamp time = getTime();
-
-        // use method from component below except "isDead"
-        String mainContent = BaiduMainContent.getMainContent(html);
-        String education = BaiduEducation.getEducation(html);
-        String initial = BaiduInitial.getLowerCase(name, false);
         String tableContent = BaiduTable.getAllContentFromTable(html);
-        boolean isRetied = BaiduRetired.isRetiredFromJob(job);
-        boolean isDead = getIsDead(tableContent);
-        String field = BaiduField.getFieldFromJob(job);
-        String birthday = BaiduBirthday.getBirthday(tableContent, briefIntro, mainContent);
-        String location = BaiduLocation.getLocation(job);
-        // get educationDetail
-        EducationDetail educationDetail = BaiduEducationDetial.getEduDetailFromEducation(education);
-        String educationTime = null;
-        String educationField = null;
-        String educationDegree = null;
-        if (educationDetail != null) {
-            educationTime = educationDetail.getTime();
-            educationField = educationDetail.getField();
-            educationDegree = educationDetail.getDegree();
+
+        //String relatedContent = BaiduContent.getRelatedContent(html);
+        String label = BaiduContent.getLabel(html);
+        String briefIntro = BaiduContent.getBriefIntro(html);
+        String mainContent = BaiduContent.getMainContent(html);
+
+        String name = BaiduPersonInfo.getName(html);
+        String job = BaiduPersonInfo.getJob(html);
+        String title = BaiduPersonInfo.getTitle(html);
+        boolean isIllegal = BaiduPersonInfo.isPersonRelated2Illegal(html);
+        boolean isRetied = BaiduPersonInfo.isRetiredFromJob(job);
+        boolean isDead = BaiduPersonInfo.getIsDead(tableContent);
+        int baikeId = BaiduPersonInfo.getBaikeId(html);
+        Boolean sex = BaiduPersonInfo.getSex(briefIntro);
+        String nation = BaiduPersonInfo.getNation(tableContent);
+        String birthdayStr = BaiduBirthday.getBirthday(tableContent, briefIntro, mainContent);
+        Integer birthday = null;
+        if (birthdayStr != null) {
+            birthday = Integer.valueOf(birthdayStr);
         }
+        String pictureWeb = BaiduPicture.getPicture(html);
+        String pictureLocal = null;
+        /** 不可以在线程中使用url.openStream()
+         if (pictureWeb!=null){
+         pictureLocal = BaiduPicture.downloadImage(pictureWeb,baikeId);
+         }
+         */
+        String initial = BaiduInitial.getLowerCase(name, false);
+        String field = BaiduField.getFieldFromJob(job);
+        String location = BaiduLocation.getProvince(job);
+        Timestamp time = util.getTime();
+        String id = java.util.UUID.randomUUID().toString();
+        //TODO 以下信息为空，未能提取
+        String organization = null;
+        String position = null;
+        Integer grade = null;
+        String gradeName = null;
+        boolean status = false;
+        String maxedu = null;
+        String state = BaiduPersonInfo.getState(tableContent);
+        String province = BaiduLocation.getProvince(job);
+        String city = null;
+        String area = null;
+        String town = null;
+        String birthplace = BaiduPersonInfo.getBirthplace(tableContent);
+
+        /** 新版本学习经历与人物基础信息不在同一个表，名人表和名人毕业信息表是一对多的关系，需要分别处理。
+         String education = BaiduEducation.getEducation(html);
+
+         // get educationDetail
+         EducationDetail educationDetail = BaiduEducationDetial.getEduDetailFromEducation(education);
+         String educationTime = null;
+         String educationField = null;
+         String educationDegree = null;
+         if (educationDetail != null) {
+         educationTime = educationDetail.getTime();
+         educationField = educationDetail.getField();
+         educationDegree = educationDetail.getDegree();
+         }
+         */
 
         System.out.println("人物姓名：" + name + ", 人物职业：" + job);
 
-        Alumni alumni = new Alumni();
-        alumni.setName(name);
-        alumni.setJob(job);
-        alumni.setEducation(education);
-        alumni.setIllegal(isIllegal);
-        alumni.setWebsite(website);
-        alumni.setPicture(picture);
-        alumni.setContent(content);
-        alumni.setLabel(label);
-        alumni.setMainContent(mainContent);
-        alumni.setBriefIntro(briefIntro);
-        alumni.setTime(time);
-        alumni.setTableContent(tableContent);
-        alumni.setEducationDegree(educationDegree);
-        alumni.setEducationField(educationField);
-        alumni.setEducationTime(educationTime);
-        alumni.setRetired(isRetied);
-        alumni.setField(field);
-        alumni.setInitial(initial);
-        alumni.setAlive(isDead);
-        alumni.setLocation(location);
-        alumni.setBirthday(birthday);
-        int a = 0;
-        //baiduAlumniDAO.add(alumni);
-    }
-
-    private String getName(Html html) {
-        String personNamePath = "//dd[@class='lemmaWgt-lemmaTitle-title']/h1/text()";
-        Selectable personNamePage;
-        String personName;
-        personNamePage = html.xpath(personNamePath);
-        personName = personNamePage.toString();
-        return personName;
-    }
-
-    private String getPicture(Html html) {
-        String personPicturePath = "//div[@class='summary-pic']/a/img/@src";
-        Selectable personPicturePage;
-        List<String> personPictures;
-        personPicturePage = html.xpath(personPicturePath);
-        personPictures = personPicturePage.all();
-        for (String personPicture : personPictures) {
-            return personPicture;
-        }
-        return null;
-    }
-
-    private String getJob(Html html) {
-        // xpath
-        String personJobInfoPath1 = "//dd[@class='lemmaWgt-lemmaTitle-title']/h2/text()";
-        String personJobInfoPath2 = "//div[@class='para']/allText()";
-        String personJobInfoPath3 = "//div[@class='basic-info cmn-clearfix']/allText()";
-        // java rgex
-        String[] personJobPath2s = {"现任(.*?)。", "职业为(.*?)。", "现为(.*?)。", "现系(.*?)。", "现任(.*?)；", "职业为(.*?)；", "现为(.*?)；", "现系(.*?)；"};
-        String[] personJobPath3 = {"职务 (.*?) ", "职称 (.*?) ", "职业 (.*?) "};
-        String personJobPath1 = "（(.*)）";
-        String indexPath = "\\[\\d*?[-—]?\\d*?\\]";
-        String blankPath = "(\\s|\\u00A0)*";
-        String blank160Path = "\\u00A0*";
-
-        Selectable personJobInfoPage;
-        String personJob;
-        List<String> personJobInfos = new ArrayList<>();
-
-        // 从匹配模式二获取职业信息
-        personJobInfoPage = html.xpath(personJobInfoPath2);
-        personJobInfos = personJobInfoPage.all();
-        personJob = util.getMatching(personJobInfos, personJobPath2s);
-        if (personJob == null) {
-            // 从匹配模式一种获取职业信息
-            personJobInfoPage = html.xpath(personJobInfoPath1);
-            personJob = personJobInfoPage.toString();
-            // 判断从匹配模式一是否能够获取职业信息
-            if (personJob != null) {
-                //java正则匹配去除结果中括号
-                personJob = util.getMatching(personJob, personJobPath1);
-            }
-            //前两个模式都匹配失败，尝试从匹配模式三种获取职业信息
-            else {
-                personJobInfoPage = html.xpath(personJobInfoPath3);
-                personJob = personJobInfoPage.toString();
-                //结尾加空格，使得dd的内容始终被空格包裹
-                personJob = personJob + " ";
-                personJob = personJob.replaceAll(blank160Path, "");
-                personJob = util.getMatching(personJob, personJobPath3);
-            }
-        }
-        if (personJob != null) {
-            personJob = personJob.replaceAll(indexPath, "");
-            personJob = personJob.replaceAll(blankPath, "");
-        }
-        return personJob;
+        Person person = new Person();
+        person.setId(id);
+        person.setBaikeId(baikeId);
+        person.setWebsite(website);
+        person.setName(name);
+        person.setTitle(title);
+        person.setPictureWeb(pictureWeb);
+        person.setPictureLocal(pictureLocal);
+        person.setBriefInfo(briefIntro);
+        person.setTableContent(tableContent);
+        person.setMainContent(mainContent);
+        person.setLabel(label);
+        person.setJob(job);
+        person.setField(field);
+        person.setLocation(location);
+        person.setOrganization(organization);
+        person.setPosition(position);
+        person.setGrade(grade);
+        person.setGradeName(gradeName);
+        person.setSex(sex);
+        person.setNation(nation);
+        person.setRetired(isRetied);
+        person.setDead(isDead);
+        person.setIllegal(isIllegal);
+        person.setInitial(initial);
+        person.setBirthday(birthday);
+        person.setTime(time);
+        person.setStatus(status);
+        person.setMaxedu(maxedu);
+        person.setState(state);
+        person.setProvince(province);
+        person.setCity(city);
+        person.setArea(area);
+        person.setTown(town);
+        person.setBirthplace(birthplace);
+        
+        int result = 0;
+        result = personInfoDAO.insertPersonInfoSqlserver(person);
+        System.out.println(result);
+        return result;
     }
 
     /**
-     * @param html 人物词条html
-     * @return 所有包含武大同义词的段落
-     * @description
+     * @return void
+     * @description 从名人表中获取数据，根据学校表格中的学校关键词，获取名人的毕业信息，保存到名人毕业信息表中。
      */
-    private String getContent(Html html) {
-        String content = "";
-        String contentXpath1 = "//div[@class='para']/allText()";
-        String contentXpath2 = "//dd[@class='lemmaWgt-lemmaTitle-title']/allText()";
-        String contentXpath3 = "//div[@class='basic-info cmn-clearfix']//dd/allText()";
-        String contentXpath4 = "//dl[@class='lemma-reference collapse nslog-area log-set-param']//li/allText()";
-        List<String> contents = new ArrayList<>();
-        Selectable contentPage;
-        contentPage = html.xpath(contentXpath1);
-        contents = contentPage.all();
-        contentPage = html.xpath(contentXpath2);
-        contents.add(contentPage.toString());
-        contentPage = html.xpath(contentXpath3);
-        contents.addAll(contentPage.all());
-        contentPage = html.xpath(contentXpath4);
-        contents.addAll(contentPage.all());
-        for (String tempContent : contents) {
-            for (String schoolName : SCHOOLNAME) {
-                if (tempContent.contains(schoolName)) {
-                    content = content + tempContent;
+    private static void updateAllGraduate() {
+        BaiduEducation baiduEducation = new BaiduEducation();
+        int totalNumber = personInfoDAO.getPersonInfoCount();
+        for (int count = totalNumber; count > 0; count = count - 5000) {
+            List<Person> personList = personInfoDAO.getPersonInfoList(5000);
+            List<School> schoolList = schoolDAO.getSchoolList();
+            for (Person person : personList) {
+                boolean isInsertSuccess = true;
+                for (School school : schoolList) {
+                    baiduEducation.setup(school, person);
+                    int insertResult = baiduEducation.insertGraduate();
+                    if (insertResult != -3 && insertResult <= 0)
+                        isInsertSuccess = false;
                 }
+                if (isInsertSuccess)
+                    personInfoDAO.updatePersonStatus(person.getId());
             }
         }
-        return content;
     }
 
-    private String getLabel(Html html) {
-        Selectable labelPage;
-        String label;
-        String labelXpath = "//div[@id='open-tag']/dd[@id='open-tag-item']/allText()";
-
-        labelPage = html.xpath(labelXpath);
-        label = labelPage.toString();
-        return label;
-    }
-
-    private Timestamp getTime() {
-        Date date = new Date();
-        return new Timestamp(date.getTime());
-    }
-
-    private String getBriefIntro(Html html) {
-        Selectable briefIntroPage;
-        String briefIntro = "";
-        List<String> briefIntroList;
-        String briefIntroXpath = "//div[@class='lemma-summary']/div[@class='para']/allText()";
-
-        briefIntroPage = html.xpath(briefIntroXpath);
-        briefIntroList = briefIntroPage.all();
-        for (String str : briefIntroList) {
-            briefIntro = briefIntro + str;
+    private static void updateGraduateForTest(int count) {
+        BaiduEducation baiduEducation = new BaiduEducation();
+        List<Person> personList = personInfoDAO.getPersonInfoList(count);
+        List<School> schoolList = schoolDAO.getSchoolList();
+        for (Person person : personList) {
+            boolean isInsertSuccess = true;
+            for (School school : schoolList) {
+                baiduEducation.setup(school, person);
+                int insertResult = baiduEducation.insertGraduate();
+                if (insertResult != -3 && insertResult <= 0)
+                    isInsertSuccess = false;
+            }
+            if (isInsertSuccess)
+                personInfoDAO.updatePersonStatus(person.getId());
         }
-        briefIntro = util.getPureStringFromText(briefIntro);
-        return briefIntro;
     }
 
-    /**
-     * @param tableContent 人物表格字符串
-     * @return 逝世返回true, 在世返回false
-     * @description
-     */
-    private boolean getIsDead(String tableContent) {
-        String[] passAwayKeywordCHN = {"逝世日期", "过世日期"};
-        String aliveStr = BaiduTable.getContentFromTableStr(tableContent, passAwayKeywordCHN);
-        return aliveStr != null;
+    private static void downloadAllPictures() {
+        List<Person> personList = personInfoDAO.getPersonPictureList();
+        for (Person person : personList) {
+            String pictureName = BaiduPicture.downloadImage(person.getPictureWeb(), person.getBaikeId());
+            if (pictureName != null) {
+                int updateResult = personInfoDAO.updatePictureLocal(person.getId(), pictureName);
+                if (updateResult == 1)
+                    System.out.println(updateResult);
+                else
+                    System.out.println(person.getWebsite() + " error:" + updateResult);
+            }
+
+
+        }
     }
 
     private static void searchAllAlumniFromWeb() {
-        searchNameList = baiduAlumniDAO.getCandidate();
+        searchNameList = personNameDAO.getPersonNameSqlserver(80000);
         List<String> urls = new ArrayList<>();
         for (String name : searchNameList) {
             urls.add("https://baike.baidu.com/item/" + name);
@@ -380,7 +336,7 @@ public class BaiduSearchProcessor implements PageProcessor {
     }
 
     private static void searchAlumniForTest() {
-        searchNameList = Arrays.asList("侯伟");
+        searchNameList = Arrays.asList("阿坝州");
         List<String> urls = new ArrayList<>();
         for (String name : searchNameList) {
             urls.add("https://baike.baidu.com/item/" + name);
@@ -393,6 +349,7 @@ public class BaiduSearchProcessor implements PageProcessor {
                 .run();
     }
 
+    /*
     private static void setupDatabase() {
         BaiduAlumniDAO.setAlumniTable(alumniTable);
         BaiduAlumniDAO.setCandidateTable(candidateTable);
@@ -410,9 +367,14 @@ public class BaiduSearchProcessor implements PageProcessor {
         BaiduLocation.setProvinceTable(provinceTable);
         BaiduLocation.setSchoolTable(schoolTable);
     }
+     */
 
     public static void main(String[] args) {
-        setupDatabase();
-        searchAlumniForTest();
+        //PropertyConfigurator.configure("E:\\GitHub\\AlumnusBaike\\src\\log4j.properties");
+        //searchAllAlumniFromWeb();
+        //updateAllGraduate();
+        //updateGraduateForTest(1);
+        downloadAllPictures();
+        //searchAlumniForTest();
     }
 }

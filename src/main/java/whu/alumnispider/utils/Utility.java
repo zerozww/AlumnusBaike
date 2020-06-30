@@ -1,5 +1,7 @@
 package whu.alumnispider.utils;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,5 +90,10 @@ public class Utility {
         pureWord = word.replaceAll(blank160Path,"");
         pureWord = pureWord.replaceAll(indexPath,"");
         return pureWord;
+    }
+
+    public Timestamp getTime() {
+        Date date = new Date();
+        return new Timestamp(date.getTime());
     }
 }

@@ -68,7 +68,7 @@ public class BaiduLocation {
         }
 
         for (int i = 0; i < listSize; i++) {
-            location = getLocation(jobs.get(i));
+            location = getProvince(jobs.get(i));
 
             if (location != null) {
                 alumniDAO.update(location, "location", ids.get(i), alumniTable);
@@ -76,7 +76,7 @@ public class BaiduLocation {
         }
     }
 
-    public static String getLocation(String job) {
+    public static String getProvince(String job) {
         String ret = null;
         if (job != null) {
             for (University university : universities) {

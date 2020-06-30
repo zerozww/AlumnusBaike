@@ -3,7 +3,7 @@ package whu.alumnispider.utilities;
 import java.sql.Timestamp;
 import java.time.Year;
 
-
+//新版本弃用该实体类
 public class Alumni {
     private String name;
     private String job;
