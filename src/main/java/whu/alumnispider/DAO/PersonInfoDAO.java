@@ -9,21 +9,9 @@ import java.util.List;
 public class PersonInfoDAO {
     private Connection conn = null;
     private Statement stmt = null;
-    private String personInfoTableMysql = "`alumnus`.`person_info`";
     private String personInfoTableSqlserver = "[person_info]";
 
     public PersonInfoDAO() {
-        /** mysql
-         try {
-         Class.forName("com.mysql.jdbc.Driver");
-         conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/alumnus?serverTimezone=UTC&characterEncoding=utf8", "root", "zww123456");
-         stmt = conn.createStatement();
-         } catch (ClassNotFoundException | SQLException e) {
-         e.printStackTrace();
-         }
-         */
-        // sql server
-
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=alumnus", "sa", "zww123456");
@@ -33,58 +21,7 @@ public class PersonInfoDAO {
         }
 
     }
-    /*
-    public int insertPersonInfoMysql(Person person) {
-        try {
-            String sql = "INSERT INTO " + personInfoTableSqlserver + "(`id`,`baike_id`,`website`,`name`,`title`," +
-                    "`picture_web`,`picture_local`,`brief_info`,`table_content`,`main_content`,`label`,`job`," +
-                    "`field`,`location`,`organization`,`position`,`grade`,`grade_name`,`sex`,`nation`," +
-                    "`retired`,`dead`,`illegal`,`initial`,`birthday`,`time`)" +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-            PreparedStatement preparedStatement = conn.prepareStatement(sql);
 
-            preparedStatement.setString(1, person.getId());
-            preparedStatement.setInt(2, person.getBaikeId());
-            preparedStatement.setString(3, person.getWebsite());
-            preparedStatement.setString(4, person.getName());
-            preparedStatement.setString(5, person.getTitle());
-            preparedStatement.setString(6, person.getPictureWeb());
-            preparedStatement.setString(7, person.getPictureLocal());
-            preparedStatement.setString(8, person.getBriefInfo());
-            preparedStatement.setString(9, person.getTableContent());
-            preparedStatement.setString(10, person.getMainContent());
-            preparedStatement.setString(11, person.getLabel());
-            preparedStatement.setString(12, person.getJob());
-            preparedStatement.setString(13, person.getField());
-            preparedStatement.setString(14, person.getLocation());
-            preparedStatement.setString(15, person.getOrganization());
-            preparedStatement.setString(16, person.getPosition());
-            if (person.getGrade() == null) {
-                preparedStatement.setNull(17, Types.INTEGER);
-            } else {
-                preparedStatement.setInt(17, person.getGrade());
-            }
-            preparedStatement.setString(18, person.getGradeName());
-            if (person.getSex() == null) {
-                preparedStatement.setNull(19, Types.BOOLEAN);
-            } else {
-                preparedStatement.setBoolean(19, person.getSex());
-            }
-            preparedStatement.setString(20, person.getNation());
-            preparedStatement.setBoolean(21, person.isRetired());
-            preparedStatement.setBoolean(22, person.isDead());
-            preparedStatement.setBoolean(23, person.isIllegal());
-            preparedStatement.setString(24, person.getInitial());
-            preparedStatement.setString(25, person.getBirthday());
-            preparedStatement.setTimestamp(26, person.getTime());
-
-            return preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-     */
     public int insertPersonInfoSqlserver(Person person) {
         try {
             String sql = "INSERT INTO " + personInfoTableSqlserver + "([id],[baike_id],[website],[name],[title]," +

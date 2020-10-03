@@ -1,6 +1,7 @@
 package whu.alumnispider.baidusearchcomponent;
 
-import whu.alumnispider.DAO.AlumniDAO;
+
+import whu.alumnispider.DAO.BaiduLocationDAO;
 import whu.alumnispider.utilities.Province;
 import whu.alumnispider.utilities.University;
 
@@ -11,14 +12,13 @@ import java.util.regex.Pattern;
 
 public class BaiduLocation {
 
-    private static AlumniDAO alumniDAO = new AlumniDAO();
-    private static String alumniTable = "alumnus_v2";
+    private static BaiduLocationDAO baiduLocationDAO = new BaiduLocationDAO();
     private static String provinceTable = "provinces";
     private static String schoolTable = "tb_school";
-    private static List<String> universitiesAreas = alumniDAO.readFromTable(schoolTable, "area_name");
-    private static List<String> universitiesNames = alumniDAO.readFromTable(schoolTable, "school_name");
-    private static List<String> provinceIndexes = alumniDAO.readFromTable(provinceTable, "number");
-    private static List<String> provinceNames = alumniDAO.readFromTable(provinceTable, "name");
+    private static List<String> universitiesAreas = baiduLocationDAO.readFromTable(schoolTable, "area_name");
+    private static List<String> universitiesNames = baiduLocationDAO.readFromTable(schoolTable, "school_name");
+    private static List<String> provinceIndexes = baiduLocationDAO.readFromTable(provinceTable, "number");
+    private static List<String> provinceNames = baiduLocationDAO.readFromTable(provinceTable, "name");
     private static List<University> universities = getUniversities();
     private static List<Province> provinces = getProvinces();
 
@@ -43,37 +43,6 @@ public class BaiduLocation {
             provinceList.add(province);
         }
         return provinceList;
-    }
-
-    public static void updateAllLocation() {
-        List<String> mainContents = alumniDAO.readFromTable(alumniTable, "main_content");
-        List<String> ids = alumniDAO.readFromTable(alumniTable, "id");
-        List<String> jobs = alumniDAO.readFromTable(alumniTable, "job");
-        int listSize = mainContents.size();
-        List<String> locations = new ArrayList<String>();
-        String location = null;
-
-        for (int i = 0; i < universitiesNames.size(); i++) {
-            University university = new University(universitiesAreas.get(i), universitiesNames.get(i));
-            universities.add(university);
-        }
-
-        for (int i = 0; i < provinceNames.size(); i++) {
-            String tempName = provinceNames.get(i);
-            tempName = tempName.trim();
-            provinceNames.set(i, tempName);
-
-            Province province = new Province(provinceIndexes.get(i), provinceNames.get(i));
-            provinces.add(province);
-        }
-
-        for (int i = 0; i < listSize; i++) {
-            location = getProvince(jobs.get(i));
-
-            if (location != null) {
-                alumniDAO.update(location, "location", ids.get(i), alumniTable);
-            }
-        }
     }
 
     public static String getProvince(String job) {
@@ -148,29 +117,5 @@ public class BaiduLocation {
         if (index == "65") return "新疆省";
 
         return null;
-    }
-
-    public static String getAlumniTable() {
-        return alumniTable;
-    }
-
-    public static void setAlumniTable(String alumniTable) {
-        BaiduLocation.alumniTable = alumniTable;
-    }
-
-    public static String getProvinceTable() {
-        return provinceTable;
-    }
-
-    public static void setProvinceTable(String provinceTable) {
-        BaiduLocation.provinceTable = provinceTable;
-    }
-
-    public static String getSchoolTable() {
-        return schoolTable;
-    }
-
-    public static void setSchoolTable(String schoolTable) {
-        BaiduLocation.schoolTable = schoolTable;
     }
 }

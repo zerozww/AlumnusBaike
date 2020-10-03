@@ -1,13 +1,8 @@
 package whu.alumnispider.baidusearchcomponent;
 
-import whu.alumnispider.DAO.BaiduFieldDAO;
-import whu.alumnispider.utilities.Alumni;
-
 import java.util.List;
 
 public class BaiduField {
-    private static BaiduFieldDAO baiduFieldDAO = new BaiduFieldDAO();
-
     /**
      * @param job 人物职业
      * @return 人物领域{"政界","学界","商界","其他"}
@@ -41,20 +36,6 @@ public class BaiduField {
                 return "政界";
         }
         return "其他";
-    }
-
-    /**
-     * @return void
-     * @description 获取并更新所有人物的领域
-     */
-    public static void updateAllField() {
-        List<Alumni> alumniList = baiduFieldDAO.getJobList();
-        for (Alumni alumni : alumniList) {
-            String website = alumni.getWebsite();
-            String job = alumni.getJob();
-            String field = getFieldFromJob(job);
-            baiduFieldDAO.updateField(website, field);
-        }
     }
 
 }

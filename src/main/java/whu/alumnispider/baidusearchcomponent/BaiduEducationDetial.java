@@ -1,9 +1,7 @@
 package whu.alumnispider.baidusearchcomponent;
 
-import whu.alumnispider.utilities.Alumni;
 import whu.alumnispider.utilities.EducationDetail;
 import whu.alumnispider.utils.*;
-import whu.alumnispider.DAO.BaiduEducationDAO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,37 +14,10 @@ public class BaiduEducationDetial {
             "武汉水利水电学院", "葛洲坝水电工程学院", "武汉测绘学院", "武汉测量制图学院", "湖北医学院", "湖北省医学院",
             "湖北省立医学院", "武汉水利电力学院"};
      */
-    private BaiduEducationDAO alumniDAO = new BaiduEducationDAO();
     private Utility util = new Utility();
     private String[] schoolName;
 
-
-
     public BaiduEducationDetial(){}
-
-    /**
-     * @return void
-     * @description 获取并更新数据库中所有人物学历信息的时间、院系、学位
-     */
-    /*
-    public void updateAllEducationDetail() {
-        List<Alumni> alumniList = alumniDAO.getEducationList();
-        for (Alumni alumni : alumniList) {
-            updateEducationDetailFromAlumni(alumni);
-        }
-    }
-
-    private void updateEducationDetailFromAlumni(Alumni alumni) {
-        String website = alumni.getWebsite();
-        String education = alumni.getEducation();
-        EducationDetail educationDetail = getEduDetailFromEducation(education);
-        if (educationDetail != null)
-            alumniDAO.updateEducationDetail(educationDetail, website);
-    }
-     */
-
-
-
     /**
      * @param education 人物学历信息
      * @return 人物的匹配当前学校的最高学位学习经历

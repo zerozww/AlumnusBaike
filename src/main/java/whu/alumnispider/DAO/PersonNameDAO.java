@@ -9,21 +9,10 @@ import java.util.List;
 public class PersonNameDAO {
     private Connection conn = null;
     private Statement stmt = null;
-    private String personNameMysql = "`alumnus`.`person_name`";
-    private String personNameSqlserver = "[person_name]";
+    private final String personNameSqlserver = "[person_name]";
     private Utility util = new Utility();
 
     public PersonNameDAO() {
-        /** mysql版本
-         try {
-         Class.forName("com.mysql.jdbc.Driver");
-         conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/alumnus?serverTimezone=UTC&characterEncoding=utf8", "root", "zww123456");
-         stmt = conn.createStatement();
-         } catch (ClassNotFoundException | SQLException e) {
-         e.printStackTrace();
-         }
-         */
-
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=alumnus", "sa", "zww123456");
@@ -85,5 +74,39 @@ public class PersonNameDAO {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    public int insertPersonName(String name,String originalName){
+        try{
+            String sql="insert into " + personNameSqlserver + "([name],[original_name]) values (?,?)";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1,name);
+            if (originalName == null){
+                preparedStatement.setNull(2,Types.NVARCHAR);
+            }else {
+                preparedStatement.setString(2,originalName);
+            }
+            return preparedStatement.executeUpdate();
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public int getExistPersonNameNum(String name){
+        try{
+            String sql="select count(*) from" + personNameSqlserver + "where [name] = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1,name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            return resultSet.getInt(1);
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+
     }
 }

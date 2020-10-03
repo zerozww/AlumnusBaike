@@ -16,15 +16,6 @@ public class SchoolDAO {
     private String schoolNameTableSqlserver = "[school_name]";
 
     public SchoolDAO() {
-        /** mysql版本
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/alumnus?serverTimezone=UTC&characterEncoding=utf8", "root", "zww123456");
-            stmt = conn.createStatement();
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
-        }
-         */
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=alumnus", "sa", "zww123456");

@@ -3,31 +3,14 @@ package whu.alumnispider.baidusearchcomponent;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
-import whu.alumnispider.DAO.BaiduInitialDAO;
-import whu.alumnispider.utilities.Alumni;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BaiduInitial {
-
-    private static BaiduInitialDAO baiduInitialDAO = new BaiduInitialDAO();
-
-
-    /**
-     * @return void
-     * @description 更新数据库中所有人物的名字首字母字段
-     */
-    public static void updateAllInitial() {
-        List<Alumni> alumniList = baiduInitialDAO.getAllName();
-        for (Alumni alumni : alumniList) {
-            String website = alumni.getWebsite();
-            String name = alumni.getName();
-            String initial = getLowerCase(name, false);
-            baiduInitialDAO.updateInitial(website, initial);
-        }
-    }
+    private static HashMap<Character,String> PINYIN = new HashMap<Character,String>();
 
     /**
      * 获取汉字首字母或全拼大写字母
@@ -104,6 +87,12 @@ public class BaiduInitial {
             res = PinyinHelper.toHanyuPinyinStringArray(hanzi, outputFormat);
             sb.append(res[0]);//对于多音字，只用第一个拼音
         } catch (Exception e) {
+            PINYIN.put('毜',"hao");
+            PINYIN.put('飊',"biao");
+            String pinyin = PINYIN.get(hanzi);
+            if (pinyin!=null){
+                return pinyin;
+            }
             e.printStackTrace();
             return "";
         }

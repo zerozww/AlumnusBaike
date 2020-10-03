@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/AlumniDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/AlumniSchoolDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduAlumniDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduConnDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduEducationDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduFieldDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduInitialDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduPictureDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduRetiredDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/BaiduTableDAO.java" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/PersonGraduateInfoDAO.java" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/PersonInfoDAO.java" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/whu/alumnispider/DAO/PersonNameDAO.java" dialect="GenericSQL" />

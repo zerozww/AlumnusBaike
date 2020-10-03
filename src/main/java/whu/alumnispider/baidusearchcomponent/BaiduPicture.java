@@ -2,7 +2,6 @@ package whu.alumnispider.baidusearchcomponent;
 
 import us.codecraft.webmagic.selector.Html;
 import us.codecraft.webmagic.selector.Selectable;
-import whu.alumnispider.DAO.BaiduPictureDAO;
 import whu.alumnispider.utils.SslUtil;
 
 import java.io.*;
@@ -13,8 +12,6 @@ import java.util.List;
 public class BaiduPicture {
     // 图片本地保存地址
     private static final String frontPath = "D:/pictures_v2/";
-
-    private static BaiduPictureDAO baiduPictureDAO = new BaiduPictureDAO();
 
     /**
      * @description 获取图片下载地址，若无，则返回null

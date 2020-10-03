@@ -1,5 +1,6 @@
 package whu.alumnispider;
 
+import org.apache.commons.collections.CollectionUtils;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
@@ -17,25 +18,13 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class BaiduSearchProcessor implements PageProcessor {
-    private static BaiduAlumniDAO baiduAlumniDAO = new BaiduAlumniDAO();
-    private static PersonInfoDAO personInfoDAO = new PersonInfoDAO();
-    private static PersonNameDAO personNameDAO = new PersonNameDAO();
-    private static SchoolDAO schoolDAO = new SchoolDAO();
-    private Utility util = new Utility();
+    private static final PersonInfoDAO personInfoDAO = new PersonInfoDAO();
+    private static final PersonNameDAO personNameDAO = new PersonNameDAO();
+    private static final SchoolDAO schoolDAO = new SchoolDAO();
+    private final Utility util = new Utility();
     private Site site = Site.me().setSleepTime(150).setRetryTimes(2)
             .addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
-
-    private static final String alumniTable = "alumnus_v3";
-    private static final String candidateTable = "candidates";
-    private static final String pictureTable = "picture";
-    private static final String websiteTable = "websites";
-    private static final String provinceTable = "provinces";
-    private static final String schoolTable = "tb_school";
     private static List<String> searchNameList;
-    private static final String[] SCHOOLNAME = {"武汉大学", "武汉水利电力大学", "武汉测绘科技大学", "湖北医科大学",
-            "武汉水利水电学院", "葛洲坝水电工程学院", "武汉测绘学院", "武汉测量制图学院", "湖北医学院", "湖北省医学院",
-            "湖北省立医学院", "武汉水利电力学院"};
-
 
     @Override
     public Site getSite() {
@@ -44,7 +33,6 @@ public class BaiduSearchProcessor implements PageProcessor {
 
     @Override
     public void process(Page page) {
-        // TODO 添加网址和更新候选人代码被注释了。
         // ResultItem Selectable
         Selectable personPage;
 
@@ -60,15 +48,17 @@ public class BaiduSearchProcessor implements PageProcessor {
             personNameDAO.updatePersonName(name);
             return;
         }
+
         // 第一次搜索，才爬取其他目录的网址
         if (searchNameList.contains(name)) {
-            // 寻找其他目录
+            // 有内容的界面中寻找其他界面的url
             personPage = page.getHtml().xpath(personLinkXpath);
             personPages = personPage.all();
             for (String tempPage : personPages) {
                 Request request = new Request(tempPage);
                 page.addTargetRequest(request);
             }
+            // 无内容的界面，只有其他界面url列表的界面中，寻找其他界面的url
             personPage = page.getHtml().xpath(personLinkXpath2);
             personPages = personPage.all();
             for (String tempPage : personPages) {
@@ -76,18 +66,13 @@ public class BaiduSearchProcessor implements PageProcessor {
                 Request request = new Request(tempPage);
                 page.addTargetRequest(request);
             }
-            // 该页面不用爬取
+            // 若第一次搜索，就得出无内容的界面，只需对人名表进行更新，不需要进行爬虫
             if (personPages.size() > 0) {
                 personNameDAO.updatePersonName(name);
                 return;
             }
         }
-        /*
-        // 不需要判断是否与学校有关就可以提取人物信息
-        if (isPersonRelated2Whu(page)) {
-            getInformation(page);
-        }
-         */
+
         getInformation(page);
 
         //已经爬取完
@@ -96,71 +81,13 @@ public class BaiduSearchProcessor implements PageProcessor {
         }
     }
 
-    /**
-     * 新版本在爬取人物信息时不需要判断是否与武大相关
-     */
-    // 判断人物是否与武大有关，并保存网址和匹配的关键词
-    private boolean isPersonRelated2Whu(Page page) {
-        String entryTextXpath = "//dd/allText()";
-        String mainTextXpath = "//div[@class='para']/allText()";
-        // 寻找当前目录是否与武大有关
-        Selectable personWord;
-        List<String> personWords = new ArrayList<String>();
-        String schoolName;
-        String url = page.getUrl().toString();
-        // 先检索词条信息
-        personWord = page.getHtml().xpath(entryTextXpath);
-        personWords = personWord.all();
-        schoolName = getWordRelated2Whu(personWords);
-        if (schoolName != null) {
-            //System.out.println("人物词条匹配成功");
-            System.out.println("匹配成功的网址为:" + url);
-            //baiduAlumniDAO.addWebsite(url,schoolName);
-            return true;
-        } else {
-            // 词条不匹配，再检索人物的主要信息
-            personWord = page.getHtml().xpath(mainTextXpath);
-            personWords = personWord.all();
-            schoolName = getWordRelated2Whu(personWords);
-            if (schoolName != null) {
-                //System.out.println("人物主要内容匹配成功");
-                System.out.println("匹配成功的网址为:" + url);
-                //baiduAlumniDAO.addWebsite(url,schoolName);
-                return true;
-            }
-        }
-        //baiduAlumniDAO.addWebsite(url, null);
-        return false;
-    }
-
-    private String getWordRelated2Whu(String word) {
-        for (String schoolName : SCHOOLNAME) {
-            if (word.contains(schoolName)) {
-                return schoolName;
-            }
-        }
-        return null;
-    }
-
-    private String getWordRelated2Whu(List<String> words) {
-        for (String word : words) {
-            for (String schoolName : SCHOOLNAME) {
-                if (word.contains(schoolName)) {
-                    return schoolName;
-                }
-            }
-        }
-        return null;
-    }
-
 
     // get person information,use method from baidusearchcomponent
-    private int getInformation(Page page) {
+    private void getInformation(Page page) {
         Html html = page.getHtml();
         String website = page.getUrl().toString();
         String tableContent = BaiduTable.getAllContentFromTable(html);
 
-        //String relatedContent = BaiduContent.getRelatedContent(html);
         String label = BaiduContent.getLabel(html);
         String briefIntro = BaiduContent.getBriefIntro(html);
         String mainContent = BaiduContent.getMainContent(html);
@@ -181,11 +108,7 @@ public class BaiduSearchProcessor implements PageProcessor {
         }
         String pictureWeb = BaiduPicture.getPicture(html);
         String pictureLocal = null;
-        /** 不可以在线程中使用url.openStream()
-         if (pictureWeb!=null){
-         pictureLocal = BaiduPicture.downloadImage(pictureWeb,baikeId);
-         }
-         */
+
         String initial = BaiduInitial.getLowerCase(name, false);
         String field = BaiduField.getFieldFromJob(job);
         String location = BaiduLocation.getProvince(job);
@@ -204,21 +127,6 @@ public class BaiduSearchProcessor implements PageProcessor {
         String area = null;
         String town = null;
         String birthplace = BaiduPersonInfo.getBirthplace(tableContent);
-
-        /** 新版本学习经历与人物基础信息不在同一个表，名人表和名人毕业信息表是一对多的关系，需要分别处理。
-         String education = BaiduEducation.getEducation(html);
-
-         // get educationDetail
-         EducationDetail educationDetail = BaiduEducationDetial.getEduDetailFromEducation(education);
-         String educationTime = null;
-         String educationField = null;
-         String educationDegree = null;
-         if (educationDetail != null) {
-         educationTime = educationDetail.getTime();
-         educationField = educationDetail.getField();
-         educationDegree = educationDetail.getDegree();
-         }
-         */
 
         System.out.println("人物姓名：" + name + ", 人物职业：" + job);
 
@@ -257,11 +165,12 @@ public class BaiduSearchProcessor implements PageProcessor {
         person.setArea(area);
         person.setTown(town);
         person.setBirthplace(birthplace);
-        
+
         int result = 0;
+
         result = personInfoDAO.insertPersonInfoSqlserver(person);
-        System.out.println(result);
-        return result;
+        System.out.println("person_info插入数据：" + result);
+
     }
 
     /**
@@ -322,10 +231,36 @@ public class BaiduSearchProcessor implements PageProcessor {
     }
 
     private static void searchAllAlumniFromWeb() {
-        searchNameList = personNameDAO.getPersonNameSqlserver(80000);
+        searchNameList = personNameDAO.getPersonNameSqlserver(1);
         List<String> urls = new ArrayList<>();
-        for (String name : searchNameList) {
-            urls.add("https://baike.baidu.com/item/" + name);
+        List<String> sqlServerNameList = new ArrayList<>();
+        CollectionUtils.addAll(sqlServerNameList, new Object[searchNameList.size()]);
+        Collections.copy(sqlServerNameList, searchNameList);
+        for (String name : sqlServerNameList) {
+            String nameCHN = name.replaceAll("[^\\u4e00-\\u9fa5]", "");
+            if (nameCHN.equals(name)) {
+                // 名字全为中文则直接对名字进行爬虫
+                urls.add("https://baike.baidu.com/item/" + name);
+            } else {
+                if (nameCHN.length() > 0) {
+                    int existNameNum = personNameDAO.getExistPersonNameNum(nameCHN);
+                    if (existNameNum > 0) {
+                        dealWithSpecialChar(urls, name);
+                    } else if (existNameNum == 0) {
+                        // 将中文添加到名字库中，并关联原名字
+                        int isInsert = personNameDAO.insertPersonName(nameCHN, name);
+                        if (isInsert == 1) {
+                            //若原中文名含特殊符号，则原名字不进行爬虫，直接更新名字库
+                            dealWithSpecialChar(urls, name);
+                            searchNameList.add(nameCHN);
+                            urls.add("https://baike.baidu.com/item/" + nameCHN);
+                        }
+                    }
+                } else {
+                    //若原中文名含特殊符号，则原名字不进行爬虫，直接更新名字库
+                    dealWithSpecialChar(urls, name);
+                }
+            }
         }
         String[] urlArray = new String[urls.size()];
         urls.toArray(urlArray);
@@ -334,9 +269,18 @@ public class BaiduSearchProcessor implements PageProcessor {
                 .thread(3)
                 .run();
     }
+
+    private static void dealWithSpecialChar(List<String> urls, String name) {
+        if (name.contains("%") | name.contains("+") | name.contains("/") | name.contains("?") | name.contains("#") | name.contains("&") | name.contains("=")) {
+            personNameDAO.updatePersonName(name);
+        } else {
+            urls.add("https://baike.baidu.com/item/" + name);
+        }
+    }
+
 
     private static void searchAlumniForTest() {
-        searchNameList = Arrays.asList("阿坝州");
+        searchNameList = Arrays.asList("雷军");
         List<String> urls = new ArrayList<>();
         for (String name : searchNameList) {
             urls.add("https://baike.baidu.com/item/" + name);
@@ -348,31 +292,11 @@ public class BaiduSearchProcessor implements PageProcessor {
                 .thread(3)
                 .run();
     }
-
-    /*
-    private static void setupDatabase() {
-        BaiduAlumniDAO.setAlumniTable(alumniTable);
-        BaiduAlumniDAO.setCandidateTable(candidateTable);
-        BaiduAlumniDAO.setWebsiteTable(websiteTable);
-        BaiduEducationDAO.setAlumniTable(alumniTable);
-        BaiduFieldDAO.setAlumniTable(alumniTable);
-        BaiduInitialDAO.setAlumniTable(alumniTable);
-        BaiduPictureDAO.setAlumniTable(alumniTable);
-        BaiduPictureDAO.setPictureTable(pictureTable);
-        BaiduRetiredDAO.setAlumniTable(alumniTable);
-        BaiduTableDAO.setAlumniTable(alumniTable);
-
-        BaiduBirthday.setAlumniTable(alumniTable);
-        BaiduLocation.setAlumniTable(alumniTable);
-        BaiduLocation.setProvinceTable(provinceTable);
-        BaiduLocation.setSchoolTable(schoolTable);
-    }
-     */
 
     public static void main(String[] args) {
         //PropertyConfigurator.configure("E:\\GitHub\\AlumnusBaike\\src\\log4j.properties");
-        //searchAllAlumniFromWeb();
-        //updateAllGraduate();
+        searchAllAlumniFromWeb();
+        updateAllGraduate();
         //updateGraduateForTest(1);
         downloadAllPictures();
         //searchAlumniForTest();

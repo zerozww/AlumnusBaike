@@ -51,7 +51,16 @@ public class BaiduContent {
      * @description 获取人物正文的html
      */
     public static String getMainContent(Html html) {
-        String editRgex = "<a class=\"edit-icon j-edit-link\"[\\s\\S].*?</a>";
+        // 去除“编辑”超链接
+        String editRgex = "<a class=\"edit-icon j-edit-link\"[\\s\\S]*?</a>";
+        // 去除文本中的超链接
+        String aFrontRgex = "<a[^>]*>";
+        String aEndRgex = "</a>";
+        // 去除文本中的图片
+        String picRgex = "<div class=\"lemma-picture text-pic layout-right\"[\\s\\S]*?</div>";
+        // 去除文本中的上标
+        String subNumRgex = "<sup class=\"sup--normal\"[\\s\\S]*?</sup>";
+        String subBlankRgex = "<a class=\"sup-anchor\"[\\s\\S]*?</a>";
         Document doc = Jsoup.parse(html.toString());
         Elements nodes = doc.getElementsByClass("main-content");
         Element node = nodes.get(0);
@@ -70,8 +79,13 @@ public class BaiduContent {
             mainContent = m.group(1);
         }
         if (mainContent!=null){
-            mainContent = util.getPureStringFromHtml(mainContent);
+            //mainContent = util.getPureStringFromHtml(mainContent);
             mainContent = mainContent.replaceAll(editRgex,"");
+            mainContent = mainContent.replaceAll(picRgex,"");
+            mainContent = mainContent.replaceAll(subNumRgex,"");
+            mainContent = mainContent.replaceAll(subBlankRgex,"");
+            mainContent = mainContent.replaceAll(aFrontRgex,"");
+            mainContent = mainContent.replaceAll(aEndRgex,"");
         }
         return mainContent;
     }
