@@ -11,7 +11,7 @@ public class BaiduLocationDAO {
     public BaiduLocationDAO() {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=alumnus", "sa", "zww123456");
+            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=alumnus", "sa", "15212xXX!@#");
             stmt = conn.createStatement();
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();

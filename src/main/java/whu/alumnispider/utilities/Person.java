@@ -37,6 +37,17 @@ public class Person {
     private String area;
     private String town;
     private String birthplace;
+    private Integer locationLevel;
+    private String address;
+    private String mobile;
+    private String telphone;//telephone，老师设计时拼错了，不好改
+    private String email;
+    private String industry;
+    private Integer birthmonth;
+    private String remark;
+    private int addType;
+    // person_info_history的新字段
+    private String historyId;
 
     public String getId() {
         return id;
@@ -308,5 +319,85 @@ public class Person {
 
     public void setBirthplace(String birthplace) {
         this.birthplace = birthplace;
+    }
+
+    public Integer getLocationLevel() {
+        return locationLevel;
+    }
+
+    public void setLocationLevel(Integer locationLevel) {
+        this.locationLevel = locationLevel;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    public String getTelphone() {
+        return telphone;
+    }
+
+    public void setTelphone(String telphone) {
+        this.telphone = telphone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getIndustry() {
+        return industry;
+    }
+
+    public void setIndustry(String industry) {
+        this.industry = industry;
+    }
+
+    public Integer getBirthmonth() {
+        return birthmonth;
+    }
+
+    public void setBirthmonth(Integer birthmonth) {
+        this.birthmonth = birthmonth;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public int getAddType() {
+        return addType;
+    }
+
+    public void setAddType(int addType) {
+        this.addType = addType;
+    }
+
+    public String getHistoryId() {
+        return historyId;
+    }
+
+    public void setHistoryId(String historyId) {
+        this.historyId = historyId;
     }
 }

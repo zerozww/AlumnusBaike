@@ -1,9 +1,7 @@
-package whu.alumnispider.baidusearchcomponent;
+package whu.alumnispider.baidusearchComponent;
 
 import whu.alumnispider.utilities.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -1,6 +1,8 @@
 package whu.alumnispider.utils;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -95,5 +97,41 @@ public class Utility {
     public Timestamp getTime() {
         Date date = new Date();
         return new Timestamp(date.getTime());
+    }
+
+    public static String upperCase(String str) {
+        char[] ch = str.toCharArray();
+        if (ch[0] >= 'a' && ch[0] <= 'z') {
+            ch[0] = (char) (ch[0] - 32);
+        }
+        return new String(ch);
+    }
+
+    /**
+     * @description 获取当前时间
+     * @return java.lang.String
+     * @author zww
+     * @date 2020/12/11 10:31
+     */
+    public static String getTimeStr(){
+        SimpleDateFormat dateSdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date nowDate=new Date();
+        return dateSdf.format(nowDate);
+    }
+
+    /**
+     * @description 获取几天前的日期
+     * @param day 天数
+     * @return java.lang.String
+     * @author zww
+     * @date 2020/12/11 10:31
+     */
+    public static String getTimeStr(int day){
+        SimpleDateFormat dateSdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DATE,-day);
+        Date nowDate=calendar.getTime();
+        return dateSdf.format(nowDate);
     }
 }

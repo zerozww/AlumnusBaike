@@ -11,7 +11,8 @@ import us.codecraft.webmagic.selector.Selectable;
 import whu.alumnispider.DAO.*;
 import whu.alumnispider.utilities.*;
 import whu.alumnispider.utils.*;
-import whu.alumnispider.baidusearchcomponent.*;
+import whu.alumnispider.baidusearchComponent.*;
+import whu.alumnispider.matchComponent.*;
 
 
 import java.sql.Timestamp;
@@ -25,6 +26,8 @@ public class BaiduSearchProcessor implements PageProcessor {
     private Site site = Site.me().setSleepTime(150).setRetryTimes(2)
             .addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
     private static List<String> searchNameList;
+    public static boolean isTest = false;
+    private static final int DAY_INTERVAL = 10;
 
     @Override
     public Site getSite() {
@@ -55,6 +58,7 @@ public class BaiduSearchProcessor implements PageProcessor {
             personPage = page.getHtml().xpath(personLinkXpath);
             personPages = personPage.all();
             for (String tempPage : personPages) {
+                tempPage = "https://baike.baidu.com"+tempPage;
                 Request request = new Request(tempPage);
                 page.addTargetRequest(request);
             }
@@ -73,17 +77,22 @@ public class BaiduSearchProcessor implements PageProcessor {
             }
         }
 
-        getInformation(page);
+        Person person = getInformation(page);
+
+        PersonMatch.personMatch(person);
+
+        // 如果是测试，则不进行后续数据库操作
+        if (isTest) return;
 
         //已经爬取完
         if (searchNameList.contains(name)) {
             personNameDAO.updatePersonName(name);
+            //searchNameList.remove(name);
         }
     }
 
-
     // get person information,use method from baidusearchcomponent
-    private void getInformation(Page page) {
+    private Person getInformation(Page page) {
         Html html = page.getHtml();
         String website = page.getUrl().toString();
         String tableContent = BaiduTable.getAllContentFromTable(html);
@@ -112,6 +121,7 @@ public class BaiduSearchProcessor implements PageProcessor {
         String initial = BaiduInitial.getLowerCase(name, false);
         String field = BaiduField.getFieldFromJob(job);
         String location = BaiduLocation.getProvince(job);
+        int addType = 1;
         Timestamp time = util.getTime();
         String id = java.util.UUID.randomUUID().toString();
         //TODO 以下信息为空，未能提取
@@ -165,18 +175,16 @@ public class BaiduSearchProcessor implements PageProcessor {
         person.setArea(area);
         person.setTown(town);
         person.setBirthplace(birthplace);
+        person.setAddType(addType);
 
-        int result = 0;
-
-        result = personInfoDAO.insertPersonInfoSqlserver(person);
-        System.out.println("person_info插入数据：" + result);
-
+        return person;
     }
 
     /**
      * @return void
      * @description 从名人表中获取数据，根据学校表格中的学校关键词，获取名人的毕业信息，保存到名人毕业信息表中。
      */
+    /*
     private static void updateAllGraduate() {
         BaiduEducation baiduEducation = new BaiduEducation();
         int totalNumber = personInfoDAO.getPersonInfoCount();
@@ -198,6 +206,7 @@ public class BaiduSearchProcessor implements PageProcessor {
     }
 
     private static void updateGraduateForTest(int count) {
+
         BaiduEducation baiduEducation = new BaiduEducation();
         List<Person> personList = personInfoDAO.getPersonInfoList(count);
         List<School> schoolList = schoolDAO.getSchoolList();
@@ -213,8 +222,25 @@ public class BaiduSearchProcessor implements PageProcessor {
                 personInfoDAO.updatePersonStatus(person.getId());
         }
     }
+    */
+    public static void updateAllGraduate(){
+        int totalNumber = personInfoDAO.getPersonInfoCount();
+        for (int count = totalNumber; count > 0; count = count - 5000) {
+            List<Person> personList = personInfoDAO.getPersonInfoList(5000);
+            for (Person person : personList) {
+                GraduateMatch.graduateMatch(person);
+            }
+        }
+    }
 
-    private static void downloadAllPictures() {
+    public static void updateGraduateForTest(int count) {
+        List<Person> personList = personInfoDAO.getPersonInfoList(count);
+        for (Person person : personList) {
+            GraduateMatch.graduateMatch(person);
+        }
+    }
+
+    public static void downloadAllPictures() {
         List<Person> personList = personInfoDAO.getPersonPictureList();
         for (Person person : personList) {
             String pictureName = BaiduPicture.downloadImage(person.getPictureWeb(), person.getBaikeId());
@@ -225,13 +251,13 @@ public class BaiduSearchProcessor implements PageProcessor {
                 else
                     System.out.println(person.getWebsite() + " error:" + updateResult);
             }
-
-
         }
     }
 
-    private static void searchAllAlumniFromWeb() {
-        searchNameList = personNameDAO.getPersonNameSqlserver(1);
+    public static void searchAllAlumniFromWeb() {
+        String time = Utility.getTimeStr(DAY_INTERVAL);
+        searchNameList = personNameDAO.getPersonNameSqlserver(10000,time);
+        // 复制searchNameList
         List<String> urls = new ArrayList<>();
         List<String> sqlServerNameList = new ArrayList<>();
         CollectionUtils.addAll(sqlServerNameList, new Object[searchNameList.size()]);
@@ -257,7 +283,7 @@ public class BaiduSearchProcessor implements PageProcessor {
                         }
                     }
                 } else {
-                    //若原中文名含特殊符号，则原名字不进行爬虫，直接更新名字库
+                    // name全部不是中文
                     dealWithSpecialChar(urls, name);
                 }
             }
@@ -269,8 +295,15 @@ public class BaiduSearchProcessor implements PageProcessor {
                 .thread(3)
                 .run();
     }
-
-    private static void dealWithSpecialChar(List<String> urls, String name) {
+    /**
+     * @description 若原中文名含特殊符号，则原名字不进行爬虫，直接更新名字库，否则进行爬虫。
+     * @param urls URL的list
+     * @param name 目前处理的姓名字符串
+     * @return void
+     * @author zww
+     * @date 2020/11/30 16:45
+     */
+    public static void dealWithSpecialChar(List<String> urls, String name) {
         if (name.contains("%") | name.contains("+") | name.contains("/") | name.contains("?") | name.contains("#") | name.contains("&") | name.contains("=")) {
             personNameDAO.updatePersonName(name);
         } else {
@@ -278,8 +311,8 @@ public class BaiduSearchProcessor implements PageProcessor {
         }
     }
 
-
-    private static void searchAlumniForTest() {
+    public static void searchAlumniForTest() {
+        isTest = true;
         searchNameList = Arrays.asList("雷军");
         List<String> urls = new ArrayList<>();
         for (String name : searchNameList) {
@@ -295,10 +328,11 @@ public class BaiduSearchProcessor implements PageProcessor {
 
     public static void main(String[] args) {
         //PropertyConfigurator.configure("E:\\GitHub\\AlumnusBaike\\src\\log4j.properties");
+        //searchAlumniForTest();
         searchAllAlumniFromWeb();
         updateAllGraduate();
         //updateGraduateForTest(1);
         downloadAllPictures();
-        //searchAlumniForTest();
+
     }
 }

@@ -1,4 +1,4 @@
-package whu.alumnispider.baidusearchcomponent;
+package whu.alumnispider.baidusearchComponent;
 
 
 import whu.alumnispider.DAO.BaiduLocationDAO;

@@ -1,4 +1,4 @@
-package whu.alumnispider.baidusearchcomponent;
+package whu.alumnispider.baidusearchComponent;
 
 import us.codecraft.webmagic.selector.Html;
 import us.codecraft.webmagic.selector.Selectable;
@@ -6,12 +6,11 @@ import whu.alumnispider.utils.SslUtil;
 
 import java.io.*;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 
 public class BaiduPicture {
     // 图片本地保存地址
-    private static final String frontPath = "D:/pictures_v2/";
+    private static final String frontPath = "D:/pictures_v3/";
 
     /**
      * @description 获取图片下载地址，若无，则返回null

@@ -18,6 +18,7 @@ public class Graduate {
     private Timestamp time;
     // addType,数据添加类型，系统添加为1，人工修改为2
     private int addType;
+    private String historyId;
 
     public String getId() {
         return id;
@@ -129,5 +130,13 @@ public class Graduate {
 
     public void setAddType(int addType) {
         this.addType = addType;
+    }
+
+    public String getHistoryId() {
+        return historyId;
+    }
+
+    public void setHistoryId(String historyId) {
+        this.historyId = historyId;
     }
 }

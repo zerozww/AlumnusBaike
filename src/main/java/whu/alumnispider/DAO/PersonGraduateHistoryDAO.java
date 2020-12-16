@@ -4,27 +4,27 @@ import whu.alumnispider.utilities.Graduate;
 
 import java.sql.*;
 
-public class PersonGraduateInfoDAO {
+public class PersonGraduateHistoryDAO {
     private Connection conn = null;
     private Statement stmt = null;
-    private String graduateTableSqlserver = "[person_graduate_info]";
+    private String graduateHistoryTable = "[person_graduate_info_history]";
 
-    public PersonGraduateInfoDAO() {
+    public PersonGraduateHistoryDAO() {
 
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=alumnus", "sa", "zww123456");
+            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=alumnus", "sa", "15212xXX!@#");
             stmt = conn.createStatement();
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public int insertGraduateSqlserver(Graduate graduate) {
+    public int insertGraduateHistory(Graduate graduate) {
         try {
-            String sql = "insert into " + graduateTableSqlserver + "([id],[person_id],[baike_id],[school_id],[person_name]," +
+            String sql = "insert into " + graduateHistoryTable + "([id],[person_id],[baike_id],[school_id],[person_name]," +
                     "[school_name],[match_name],[education],[education_degree],[education_field],[education_time]," +
-                    "[time],[addtype],[education_entire]) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "[time],[addtype],[education_entire],[history_id]) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
 
             preparedStatement.setString(1, graduate.getId());
@@ -41,11 +41,11 @@ public class PersonGraduateInfoDAO {
             preparedStatement.setTimestamp(12, graduate.getTime());
             preparedStatement.setInt(13,graduate.getAddType());
             preparedStatement.setString(14,graduate.getEducationEntire());
+            preparedStatement.setString(15,graduate.getHistoryId());
             return preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return -1;
     }
-
 }

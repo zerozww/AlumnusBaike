@@ -1,6 +1,4 @@
-package whu.alumnispider.baidusearchcomponent;
-
-import java.util.List;
+package whu.alumnispider.baidusearchComponent;
 
 public class BaiduField {
     /**

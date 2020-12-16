@@ -1,8 +1,8 @@
-package whu.alumnispider.baidusearchcomponent;
+package whu.alumnispider.baidusearchComponent;
 
 import us.codecraft.webmagic.selector.Html;
 import us.codecraft.webmagic.selector.Selectable;
-import whu.alumnispider.DAO.PersonGraduateInfoDAO;
+import whu.alumnispider.DAO.PersonGraduateDAO;
 import whu.alumnispider.DAO.PersonInfoDAO;
 import whu.alumnispider.utilities.EducationDetail;
 import whu.alumnispider.utilities.Graduate;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static whu.alumnispider.baidusearchcomponent.BaiduTable.getContentFromTable;
+import static whu.alumnispider.baidusearchComponent.BaiduTable.getContentFromTable;
 
 public class BaiduEducation {
     /*
@@ -26,7 +26,7 @@ public class BaiduEducation {
             "湖北省立医学院", "武汉水利电力学院"};
      */
     private Utility util = new Utility();
-    private static PersonGraduateInfoDAO personGraduateInfoDAO = new PersonGraduateInfoDAO();
+    private static PersonGraduateDAO personGraduateDAO = new PersonGraduateDAO();
     private static BaiduEducationDetial baiduEducationDetial = new BaiduEducationDetial();
     private static PersonInfoDAO personInfoDAO = new PersonInfoDAO();
     private String[] schoolName;
@@ -48,7 +48,9 @@ public class BaiduEducation {
      * @description
      * @return -1:更新maxedu失败; -2:插入graduate失败; -3:education为空; 0:更新maxedu不成功，sql成功运行但没有更新成功; -4:获取detail失败
      */
+    /*
     public int insertGraduate() {
+
         // totalEducation是人物全部的学习经历，包含所有学位
         String totalEducation = getEducation(person);
         if (totalEducation == null || totalEducation.isEmpty())
@@ -91,10 +93,62 @@ public class BaiduEducation {
         int insertGraduateResult = personGraduateInfoDAO.insertGraduateSqlserver(graduate);
         int updateMaxeduResult = INSERTGRADUATEERROR;
         if (insertGraduateResult!= -1){
-            updateMaxeduResult = personInfoDAO.updatePersonMaxedu(educationDegree,personId);
+            updateMaxeduResult = personInfoDAO.updatePersonMaxedu(graduate.getEducationDegree(),graduate.getPersonId());
         }
         System.out.println("更新maxedu: "+ updateMaxeduResult);
         return updateMaxeduResult;
+    }
+    */
+
+    /**
+     * @description
+     * @return whu.alumnispider.utilities.Graduate graduate数据；null,暂时判断没有问题
+     * @author zww
+     * @date 2020/12/4 16:18
+     */
+    public Graduate getGraduate(){
+        // totalEducation是人物全部的学习经历，包含所有学位
+        String totalEducation = getEducation(person);
+        if (totalEducation == null || totalEducation.isEmpty())
+            return null;
+        baiduEducationDetial.setSchoolName(schoolName);
+        EducationDetail educationDetail = baiduEducationDetial.getEduDetailFromEducation(totalEducation);
+        if (educationDetail==null){
+            System.out.format("person_id为：%s ，从教育经历中获取学历、学位、时间失败。",person.getId());
+            return null;
+        }
+        Graduate graduate = new Graduate();
+        String id = java.util.UUID.randomUUID().toString();
+        String personId = person.getId();
+        int baikeId = person.getBaikeId();
+        int schoolId = school.getSchoolId();
+        String personName = person.getName();
+        String schoolName = school.getName();
+        String matchName = educationDetail.getMatchName();
+        // 此处的education专指人物某一学位的学习经历
+        String education = educationDetail.getEducation();
+        String educationDegree = educationDetail.getDegree();
+        String educatinoField = educationDetail.getField();
+        String educationTime = educationDetail.getTime();
+        Timestamp time = util.getTime();
+        int addType = 1;
+
+        graduate.setId(id);
+        graduate.setPersonId(personId);
+        graduate.setBaikeId(baikeId);
+        graduate.setSchoolId(schoolId);
+        graduate.setPersonName(personName);
+        graduate.setSchoolName(schoolName);
+        graduate.setMatch_name(matchName);
+        graduate.setEducationEntire(totalEducation);
+        graduate.setEducation(education);
+        graduate.setEducationDegree(educationDegree);
+        graduate.setEducationField(educatinoField);
+        graduate.setEducationTime(educationTime);
+        graduate.setTime(time);
+        graduate.setAddType(addType);
+
+        return graduate;
     }
 
     // 匹配失败则返回""

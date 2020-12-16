@@ -1,4 +1,4 @@
-package whu.alumnispider.baidusearchcomponent;
+package whu.alumnispider.baidusearchComponent;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

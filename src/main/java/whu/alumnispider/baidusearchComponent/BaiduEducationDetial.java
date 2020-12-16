@@ -1,4 +1,4 @@
-package whu.alumnispider.baidusearchcomponent;
+package whu.alumnispider.baidusearchComponent;
 
 import whu.alumnispider.utilities.EducationDetail;
 import whu.alumnispider.utils.*;
