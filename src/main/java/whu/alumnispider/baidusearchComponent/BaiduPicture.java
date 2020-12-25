@@ -10,7 +10,7 @@ import java.util.List;
 
 public class BaiduPicture {
     // 图片本地保存地址
-    private static final String frontPath = "D:/pictures_v3/";
+    private static final String frontPath = "E:/pictures_alumnus/";
 
     /**
      * @description 获取图片下载地址，若无，则返回null
