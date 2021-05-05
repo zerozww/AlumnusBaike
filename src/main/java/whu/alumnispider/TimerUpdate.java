@@ -20,7 +20,7 @@ class MyTask extends TimerTask{
         updateProcess();
 
         dateStr = Utility.getTimeStr();
-        System.out.format("时间：%s，已完成一次数据更新。",dateStr);
+        System.out.format("时间：%s，已完成一次数据更新。\n",dateStr);
     }
 
     private void updateProcess(){

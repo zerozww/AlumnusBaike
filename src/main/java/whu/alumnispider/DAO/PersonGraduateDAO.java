@@ -41,6 +41,8 @@ public class PersonGraduateDAO {
             preparedStatement.setTimestamp(12, graduate.getTime());
             preparedStatement.setInt(13,graduate.getAddType());
             preparedStatement.setString(14,graduate.getEducationEntire());
+
+
             return preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -70,6 +72,7 @@ public class PersonGraduateDAO {
                 graduate.setEducationTime(resultSet.getString("education_time"));
                 graduate.setTime(resultSet.getTimestamp("time"));
                 graduate.setAddType(resultSet.getInt("addtype"));
+
                 return graduate;
             }
         }catch (SQLException e){

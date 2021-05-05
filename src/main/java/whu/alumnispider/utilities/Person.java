@@ -48,6 +48,8 @@ public class Person {
     private int addType;
     // person_info_history的新字段
     private String historyId;
+    private Timestamp addTime;
+    private Integer lock;
 
     public String getId() {
         return id;
@@ -399,5 +401,21 @@ public class Person {
 
     public void setHistoryId(String historyId) {
         this.historyId = historyId;
+    }
+
+    public Timestamp getAddTime() {
+        return addTime;
+    }
+
+    public void setAddTime(Timestamp addTime) {
+        this.addTime = addTime;
+    }
+
+    public Integer getLock() {
+        return lock;
+    }
+
+    public void setLock(Integer lock) {
+        this.lock = lock;
     }
 }

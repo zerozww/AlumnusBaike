@@ -132,6 +132,7 @@ public class BaiduEducation {
         String educationTime = educationDetail.getTime();
         Timestamp time = util.getTime();
         int addType = 1;
+        int lock = 0;
 
         graduate.setId(id);
         graduate.setPersonId(personId);
@@ -147,6 +148,8 @@ public class BaiduEducation {
         graduate.setEducationTime(educationTime);
         graduate.setTime(time);
         graduate.setAddType(addType);
+        graduate.setAddTime(time);
+        graduate.setLock(lock);
 
         return graduate;
     }

@@ -1,6 +1,7 @@
 package whu.alumnispider;
 
 import org.apache.commons.collections.CollectionUtils;
+import sun.applet.AppletResourceLoader;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
@@ -122,6 +123,7 @@ public class BaiduSearchProcessor implements PageProcessor {
         String field = BaiduField.getFieldFromJob(job);
         String location = BaiduLocation.getProvince(job);
         int addType = 1;
+        int lock = 0;
         Timestamp time = util.getTime();
         String id = java.util.UUID.randomUUID().toString();
         //TODO 以下信息为空，未能提取
@@ -176,6 +178,8 @@ public class BaiduSearchProcessor implements PageProcessor {
         person.setTown(town);
         person.setBirthplace(birthplace);
         person.setAddType(addType);
+        person.setAddTime(time);
+        person.setLock(lock);
 
         return person;
     }
@@ -247,7 +251,7 @@ public class BaiduSearchProcessor implements PageProcessor {
             if (pictureName != null) {
                 int updateResult = personInfoDAO.updatePictureLocal(person.getId(), pictureName);
                 if (updateResult == 1)
-                    System.out.println(updateResult);
+                    System.out.println("下载图片个数："+updateResult);
                 else
                     System.out.println(person.getWebsite() + " error:" + updateResult);
             }

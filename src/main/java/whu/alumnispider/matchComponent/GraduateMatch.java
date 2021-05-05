@@ -43,7 +43,9 @@ public class GraduateMatch {
                     if(insertGraduate(graduate))
                         isUpdateSuccess = false;
                 }else {
-                    if (isUpdate(graduate,graduateMatch)){
+                    if (!isSysgen(graduateMatch)){
+                        System.out.format("教育数据为人工修改，不作处理：baidu_id: %s ,name: %s。",graduateMatch.getBaikeId(),graduateMatch.getPersonName());
+                    }else if (isUpdate(graduate,graduateMatch)){
                         updateGraduateInfo(graduate,graduateMatch);
                         // 更新时，设置id不变
                         graduate.setId(graduateMatch.getId());
@@ -108,6 +110,11 @@ public class GraduateMatch {
                 return true;
         }
         return false;
+    }
+
+    private static boolean isSysgen(Graduate graduateMatch){
+
+        return graduateMatch.getAddType() == 1;
     }
 
     private static boolean updateGraduateTable(Graduate graduate){

@@ -271,6 +271,7 @@ public class PersonInfoDAO {
             person.setBirthmonth(resultSet.getInt("birthmonth"));
         person.setRemark(resultSet.getString("remark"));
 
+
         return person;
     }
 
