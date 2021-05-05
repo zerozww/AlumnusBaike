@@ -12,13 +12,13 @@ import java.util.Map;
 public class SchoolDAO {
     private Connection conn = null;
     private Statement stmt = null;
-    private String schoolNameTableMysql = "`alumnus`.`school_name`";
+    private String schoolNameTableMysql = "`peoplebigdata`.`school_name`";
     private String schoolNameTableSqlserver = "[school_name]";
 
     public SchoolDAO() {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=alumnus", "sa", "15212xXX!@#");
+            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=peoplebigdata", "sa", "15212xXX!@#");
             stmt = conn.createStatement();
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();

@@ -15,7 +15,7 @@ public class PersonNameDAO {
     public PersonNameDAO() {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=alumnus", "sa", "15212xXX!@#");
+            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;DatabaseName=peoplebigdata", "sa", "15212xXX!@#");
             stmt = conn.createStatement();
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
