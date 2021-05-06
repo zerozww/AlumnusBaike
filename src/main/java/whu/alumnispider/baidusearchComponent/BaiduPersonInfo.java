@@ -52,6 +52,7 @@ public class BaiduPersonInfo {
         // java rgex
         String[] personJobPath2s = {"现任(.*?)。", "职业为(.*?)。", "现为(.*?)。", "现系(.*?)。", "现任(.*?)；", "职业为(.*?)；", "现为(.*?)；", "现系(.*?)；"};
         String[] personJobPath3 = {"职务 (.*?) ", "职称 (.*?) ", "职业 (.*?) "};
+        String[] personJobPath4s = {"曾任(.*?)。","曾为(.*?)。","曾系(.*?)。","曾任(.*?)；","曾为(.*?)；","曾系(.*?)；"};
         String personJobPath1 = "（(.*)）";
         String indexPath = "\\[\\d*?[-—]?\\d*?\\]";
         String blankPath = "(\\s|\\u00A0)*";
@@ -83,6 +84,12 @@ public class BaiduPersonInfo {
                 personJob = personJob.replaceAll(blank160Path, "");
                 personJob = util.getMatching(personJob, personJobPath3);
             }
+        }
+        // 如果获取不到现任信息，则尝试爬取曾任信息
+        if (personJob==null){
+            personJobInfoPage = html.xpath(personJobInfoPath1);
+            personJob = personJobInfoPage.toString();
+            personJob = util.getMatching(personJob,personJobPath4s);
         }
         if (personJob != null) {
             personJob = personJob.replaceAll(indexPath, "");
