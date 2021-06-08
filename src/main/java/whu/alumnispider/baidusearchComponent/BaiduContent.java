@@ -61,6 +61,8 @@ public class BaiduContent {
         // 去除文本中的上标
         String subNumRgex = "<sup class=\"sup--normal\"[\\s\\S]*?</sup>";
         String subBlankRgex = "<a class=\"sup-anchor\"[\\s\\S]*?</a>";
+        // 反爬虫提醒
+        String antiClimb = "该内容未授权duplicate自baidu百科";
         Document doc = Jsoup.parse(html.toString());
         Elements nodes = doc.getElementsByClass("main-content");
         Element node = nodes.get(0);
@@ -86,6 +88,7 @@ public class BaiduContent {
             mainContent = mainContent.replaceAll(subBlankRgex,"");
             mainContent = mainContent.replaceAll(aFrontRgex,"");
             mainContent = mainContent.replaceAll(aEndRgex,"");
+            mainContent = mainContent.replaceAll(antiClimb,"");
         }
         return mainContent;
     }
