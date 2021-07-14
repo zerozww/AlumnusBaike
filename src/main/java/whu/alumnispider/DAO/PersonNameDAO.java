@@ -67,6 +67,23 @@ public class PersonNameDAO {
         return null;
     }
 
+    public List<String> getPersonNameTimeIsNull(int length) {
+        try {
+            List<String> personNameList = new ArrayList<>();
+            String sql = "SELECT top "+ length +" [name] FROM " + personNameSqlserver + " WHERE time is null";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String ret = resultSet.getString("name");
+                personNameList.add(ret);
+            }
+            return personNameList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public int getPersonNumber(String time){
         try {
             String sql = "SELECT count(*) FROM " + personNameSqlserver + " WHERE [time] < ?";

@@ -308,7 +308,8 @@ public class BaiduSearchProcessor implements PageProcessor {
      * @date 2020/11/30 16:45
      */
     public static void dealWithSpecialChar(List<String> urls, String name) {
-        if (name.contains("%") | name.contains("+") | name.contains("/") | name.contains("?") | name.contains("#") | name.contains("&") | name.contains("=")) {
+        char space = 12288;
+        if (name.contains("%") | name.contains("+") | name.contains("/") | name.contains("?") | name.contains("#") | name.contains("&") | name.contains("=") | name.contains("|")|name.contains("`")|name.contains(" ")|name.contains(space+"")) {
             personNameDAO.updatePersonName(name);
         } else {
             urls.add("https://baike.baidu.com/item/" + name);
@@ -330,9 +331,51 @@ public class BaiduSearchProcessor implements PageProcessor {
                 .run();
     }
 
+    public static void searchAlumniForTest2(){
+        searchNameList = Arrays.asList("陈明贤");
+        // 复制searchNameList
+        List<String> urls = new ArrayList<>();
+        List<String> sqlServerNameList = new ArrayList<>();
+        CollectionUtils.addAll(sqlServerNameList, new Object[searchNameList.size()]);
+        Collections.copy(sqlServerNameList, searchNameList);
+        for (String name : sqlServerNameList) {
+            String nameCHN = name.replaceAll("[^\\u4e00-\\u9fa5]", "");
+            if (nameCHN.equals(name)) {
+                // 名字全为中文则直接对名字进行爬虫
+                urls.add("https://baike.baidu.com/item/" + name);
+            } else {
+                if (nameCHN.length() > 0) {
+                    int existNameNum = personNameDAO.getExistPersonNameNum(nameCHN);
+                    if (existNameNum > 0) {
+                        dealWithSpecialChar(urls, name);
+                    } else if (existNameNum == 0) {
+                        // 将中文添加到名字库中，并关联原名字
+                        int isInsert = personNameDAO.insertPersonName(nameCHN, name);
+                        if (isInsert == 1) {
+                            //若原中文名含特殊符号，则原名字不进行爬虫，直接更新名字库
+                            dealWithSpecialChar(urls, name);
+                            searchNameList.add(nameCHN);
+                            urls.add("https://baike.baidu.com/item/" + nameCHN);
+                        }
+                    }
+                } else {
+                    // name全部不是中文
+                    dealWithSpecialChar(urls, name);
+                }
+            }
+        }
+        String[] urlArray = new String[urls.size()];
+        urls.toArray(urlArray);
+        Spider.create(new BaiduSearchProcessor())
+                .addUrl(urlArray)
+                .thread(3)
+                .run();
+    }
+
     public static void main(String[] args) {
         //PropertyConfigurator.configure("E:\\GitHub\\AlumnusBaike\\src\\log4j.properties");
         //searchAlumniForTest();
+        //searchAlumniForTest2();
         searchAllAlumniFromWeb();
         updateAllGraduate();
         //updateGraduateForTest(1);

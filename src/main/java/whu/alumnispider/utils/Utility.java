@@ -17,6 +17,7 @@ public class Utility {
      * @return 第一个匹配成功的子字符串
      */
     public String getMatching(String soap, String[] rgexs) {
+        if(soap==null)return null;
         for (String rgex : rgexs) {
             Pattern pattern = Pattern.compile(rgex);
             Matcher m = pattern.matcher(soap);
