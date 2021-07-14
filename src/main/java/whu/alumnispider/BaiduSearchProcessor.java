@@ -308,7 +308,8 @@ public class BaiduSearchProcessor implements PageProcessor {
      * @date 2020/11/30 16:45
      */
     public static void dealWithSpecialChar(List<String> urls, String name) {
-        if (name.contains("%") | name.contains("+") | name.contains("/") | name.contains("?") | name.contains("#") | name.contains("&") | name.contains("=")) {
+        char space = 12288;
+        if (name.contains("%") | name.contains("+") | name.contains("/") | name.contains("?") | name.contains("#") | name.contains("&") | name.contains("=") | name.contains("|")|name.contains("`")|name.contains(" ")|name.contains(space+"")) {
             personNameDAO.updatePersonName(name);
         } else {
             urls.add("https://baike.baidu.com/item/" + name);
